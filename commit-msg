@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+"""The commit-msg Git hook to check the commit message."""
+import sys
+from enum import Enum
+
+
+class Bcolors(str, Enum):
+    """A Enum for colors using ANSI escape sequences.
+    Reference:
+    - https://stackoverflow.com/questions/287871
+    """
+
+    OK = "\033[92m"
+    INFO = "\033[94m"
+    WARNING = "\033[93m"
+    ERROR = "\033[91m"
+    BOLD = "\033[1m"
+    ENDC = "\033[0m"
+
+
+class Level(str, Enum):
+    """An Enum for notification levels."""
+
+    OK = "OK"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+
+
+def print_with_color(message: str, level: Level) -> None:
+    """Print the message with a color for the corresponding level."""
+    print(
+        Bcolors[level]
+        + Bcolors.BOLD
+        + f"{level}: [Policy] "
+        + message
+        + Bcolors.ENDC
+    )
+
+
+def check_commit_msg_pattern():
+    """Check the format of the commit message.
+    The argument passed to the "commit-msg" hook is the path to a
+    temporary file that contains the commit message written by the
+    developer.
+    """
+    msg_temp_file = sys.argv[1]
+
+    with open(msg_temp_file, "r", encoding="utf-8") as f_msg:
+        lines = f_msg.readlines()
+
+    # Remove the comment lines in the commit message.
+    lines = [line for line in lines if not line.strip().startswith("#")]
+
+    has_warning = False
+    if len(lines) < 4:
+        message = "There should at least 4 lines in your commit message."
+        print_with_color(message, Level.ERROR)
+        sys.exit(1)
+
+    if len(lines[0]) > 50:
+        has_warning = True
+        message = (
+            "There should be less then 50 characters in the commit title."
+        )
+        print_with_color(message, Level.WARNING)
+        sys.exit(1)
+
+    if lines[1].strip() != "":
+        has_warning = True
+        message = (
+            "There should be an empty line between the commit title and body."
+        )
+        print_with_color(message, Level.WARNING)
+        sys.exit(1)
+
+    has_story_id = False
+    for line in lines[2:]:
+        if len(line) > 72:
+            has_warning = True
+            message = "The commit body should wrap at 72 characters."
+            print_with_color(message, Level.WARNING)
+            sys.exit(1)
+
+        if "[#" in line:
+            has_story_id = True
+
+    if not has_story_id:
+        message = "Please add a Story ID in the commit message."
+        print_with_color(message, Level.WARNING)
+        sys.exit(1)
+
+    if not has_warning:
+        message = "The commit message has the required pattern."
+        print_with_color(message, Level.OK)
+
+
+if __name__ == "__main__":
+    check_commit_msg_pattern()
