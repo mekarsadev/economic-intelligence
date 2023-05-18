@@ -10,7 +10,7 @@
         "node_modules": true
     },
     "flake8.args": [
-        "--ignore=E501,W503"
+        "--ignore=E203,E501,W503"
     ],
     "python.linting.flake8Enabled": true
 }
