@@ -18,6 +18,7 @@ def minmax_normalization(data):
     """
     Scaling data with range above -1 up to 1
     """
+
     scaler = MinMaxScaler(feature_range=(-1, 1))
     scaled_data = scaler.fit_transform(data)
     return scaled_data
