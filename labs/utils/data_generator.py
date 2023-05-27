@@ -8,9 +8,7 @@ def dataset_loader(start_date: int, end_date: int, ticker="JPY=X"):
     url = "https://api.mekarsa.com/v1/finet/yahoo/charts"
     querystring = {"start_date": start_date, "end_date": end_date, "ticker": ticker}
     try:
-        print("fetch...", querystring)
         response = requests.request(method="GET", url=url, params=querystring)
-        print(response.json())
         return response
     except BaseException as error:
         return str(error)
@@ -24,7 +22,6 @@ def dataset_generator(start_date, end_date, ticker) -> pd.DataFrame:
         end_date = str2unix(end_date)
 
     data_json = dataset_loader(start_date, end_date, ticker)
-    print(data_json)
     if isinstance(data_json, str):
         print(data_json)
     elif data_json.status_code >= 400 and data_json < 500:
