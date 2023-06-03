@@ -27,7 +27,7 @@ class YahooViewset(Resource):
         return standardized_data, yahoo.response.status_code
 
     def standardized_outliers(self, data, threshold=3):
-        print("type ->", type(data))
+        data = self.fill_nul(data)
         mean = np.mean(data)
         std = np.std(data)
         z_scores = (data - mean) / std
@@ -38,3 +38,24 @@ class YahooViewset(Resource):
         ] = mean  # Menggantikan outlier dengan nilai rata-rata
 
         return standardized_data.tolist()
+
+    def fill_nul(self, data):
+        before_index = None
+        after_index = None
+
+        for i in range(len(data)):
+            if data[i] is not None:
+                if before_index is None:
+                    before_index = i
+                else:
+                    after_index = i
+                    break
+
+        start_value = data[before_index]
+        end_value = data[after_index]
+
+        for i in range(len(data)):
+            if data[i] is None:
+                data[i] = (start_value + end_value) / 2
+
+        return data
