@@ -18,7 +18,7 @@ class OFXViewset(Resource):
         buckets = {"timestamps": [], "values": []}
 
         for daily in data:
-            buckets["timestamps"].append(daily["PointInTime"] / 1000)
+            buckets["timestamps"].append(int(daily["PointInTime"] / 1000))
             buckets["values"].append(daily["InterbankRate"])
 
         return buckets
