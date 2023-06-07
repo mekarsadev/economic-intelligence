@@ -7,6 +7,7 @@ class OFXViewset(Resource):
     def get(self):
         params = request.args.to_dict()
         ofx = OFX(**params)
+        print("fetch...", ofx)
         ofx.fetch()
 
         response = ofx.data.json().copy()
@@ -17,7 +18,7 @@ class OFXViewset(Resource):
         buckets = {"timestamps": [], "values": []}
 
         for daily in data:
-            buckets["timestamps"].append(daily["PointInTime"])
+            buckets["timestamps"].append(daily["PointInTime"] / 1000)
             buckets["values"].append(daily["InterbankRate"])
 
         return buckets
