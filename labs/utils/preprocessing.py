@@ -4,6 +4,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 # function to create train, test data given stock data and sequence length
 def load_data(stock, look_back):
+    look_back += 1
     data_raw = stock.values  # convert to numpy array
     data = []
 
@@ -29,16 +30,39 @@ def load_data(stock, look_back):
     return x_train, y_train, x_test, y_test
 
 
-def minmax_normalization(data):
+class MinMaxScale:
+    def __init__(self):
+        self.scaler = MinMaxScaler(feature_range=(-1, 1))
+        self.norm = []
+        self.denorm = []
+
+    def minmax_normalization(self, data, feature=""):
+        data = data[[feature]]
+        scaled_data = self.scaler.fit_transform(data)
+        data["scaled"] = scaled_data[:]
+        self.norm = data
+
+    def minmax_denormalization(self, data, feature=""):
+        scaled_data = self.scaler.inverse_transform(data)
+        self.denorm = scaled_data
+
+
+def minmax_normalization(data, feature="adj_close"):
     """
     Scaling data with range above -1 up to 1
     """
 
-    data = data[["close"]]
+    data = data[[feature]]
     scaler = MinMaxScaler(feature_range=(-1, 1))
     scaled_data = scaler.fit_transform(data)
     data["scaled"] = scaled_data[:]
     return data
+
+
+def minmax_denormalization(data, feature="adj_close"):
+    scaler = MinMaxScaler(feature_range=(-1, 1))
+    scaled_data = scaler.inverse_transform(data)
+    return scaled_data
 
 
 def sliding_window(data, window):

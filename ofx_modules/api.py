@@ -33,5 +33,4 @@ class OFX:
         response = requests.request(
             "GET", url, data="", headers=headers, params=self.querystring
         )
-        print(response.status_code)
         self.data = response
