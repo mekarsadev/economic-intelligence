@@ -37,5 +37,5 @@ class PredictViewset(Resource):
             predicted_timestamp.append(timestamp)
             predicted_values.append(ofx_sample[["values"]].values[i][0])
 
-        response = {"timetamp": predicted_timestamp, "values": predicted_values}
+        response = {"timestamp": predicted_timestamp, "values": predicted_values}
         return response
