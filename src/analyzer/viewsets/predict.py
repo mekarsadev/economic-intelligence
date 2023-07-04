@@ -13,13 +13,11 @@ class PredictViewset(Resource):
 
     TICKERS = ["USDIDR=x", "JPYIDR=x"]
 
-    def post(
-        self,
-    ):
+    def post(self):
         data = request.get_json()
 
-        lstm = LSTMModel(input_size=1, hidden_sizes=[64], output_size=1)
-        lstm.load_state_dict(torch.load("labs/models/USD_10_64.pth"))
+        lstm = LSTMModel(input_size=1, hidden_sizes=[32], output_size=1)
+        lstm.load_state_dict(torch.load("labs/models/USD/best.pth"))
 
         if data["model"] not in self.TICKERS:
             return {"message": "ticker not available."}, 400
