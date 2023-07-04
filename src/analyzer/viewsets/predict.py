@@ -33,8 +33,8 @@ class PredictViewset(Resource):
         ofx_sample = ofx_dataset(start_date, end_date)
 
         for i in range(10):
-            predicted_timestamp.append(timestamp)
-            predicted_values.append(ofx_sample[["values"]].values[-1][0])
+            # predicted_timestamp.append(timestamp)
+            # predicted_values.append(ofx_sample[["values"]].values[-1][0])
             timestamp += 86400
             predicted_timestamp.append(timestamp)
             predicted_values.append(ofx_sample[["values"]].values[i][0])
