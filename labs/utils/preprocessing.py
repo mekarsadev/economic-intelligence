@@ -6,8 +6,8 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 class CustomMinMaxScaler:
-    def __init__(self, min_val=-1, max_val=1):
-        self.yaml_dir = os.path.join(os.getcwd(), "labs/config.yaml")
+    def __init__(self, min_val, max_val, config_file):
+        self.yaml_dir = os.path.join(os.getcwd(), config_file)
         with open(self.yaml_dir, "rb") as file:
             self.config = yaml.safe_load(file)
         self.min_val = min_val

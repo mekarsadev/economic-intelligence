@@ -39,7 +39,8 @@ class PredictViewset(Resource):
             end_date = end_date.strftime("%Y-%m-%d")
             start_date = start_date.strftime("%Y-%m-%d")
 
-            ofx_sample = ofx_dataset(start_date, end_date)
+            ofx_sample = ofx_dataset(start_date, end_date, scc=ticker_)
+            print(ofx_sample)
             for rate in ofx_sample[["values"]].values:
                 trigger_test.append(rate[0])
 
@@ -54,7 +55,7 @@ class PredictViewset(Resource):
         # get trigger data test
 
         # normalization trigeer data test
-        data_scaler = CustomMinMaxScaler(min_val=-1, max_val=1)
+        data_scaler = CustomMinMaxScaler(min_val=-1, max_val=1, config_file=config_file)
         normalized = data_scaler.list_transform(trigger_test)
         print(normalized[-7:])
 
