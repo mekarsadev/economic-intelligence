@@ -14,20 +14,22 @@ class OFX:
         }
 
     def fetch(self):
-        url = f"https://api.ofx.com/PublicSite.ApiService//SpotRateHistory/{self.scc}/{self.bcc}/{self.start_date}/{self.end_date}"
+        url = f"https://api.ofx.com/PublicSite.ApiService/SpotRateHistory/{self.scc}/{self.bcc}/{self.start_date}/{self.end_date}"
 
         headers = {
-            "cookie": "AWSALB=im7M9BzJ03Mq7i1ap4yAh2GuXbGpTfZkF5%2BbE2Y6C1yuCyCXjQPkpjntorRhqtIib7SPD2j5%2FHyxjQtutA%2BxoqOaZQg7iFXQU92Iel3Up2ZklGGPOmHj3Vuy%2F9ub; AWSALBCORS=im7M9BzJ03Mq7i1ap4yAh2GuXbGpTfZkF5%2BbE2Y6C1yuCyCXjQPkpjntorRhqtIib7SPD2j5%2FHyxjQtutA%2BxoqOaZQg7iFXQU92Iel3Up2ZklGGPOmHj3Vuy%2F9ub",
             "authority": "api.ofx.com",
             "accept": "*/*",
             "accept-language": "en-US,en;q=0.9,id;q=0.8",
             "dnt": "1",
             "origin": "https://www.ofx.com",
             "referer": "https://www.ofx.com/",
+            "sec-ch-ua": "'Not.A/Brand';v='8', 'Chromium';v='114', 'Google Chrome';v='114'",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "'macOS'",
             "sec-fetch-dest": "empty",
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "same-site",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
         }
 
         response = requests.request(
