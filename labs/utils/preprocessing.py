@@ -1,5 +1,50 @@
+import os
+
 import numpy as np
+import yaml
 from sklearn.preprocessing import MinMaxScaler
+
+
+class CustomMinMaxScaler:
+    def __init__(self, min_val=-1, max_val=1):
+        self.yaml_dir = os.path.join(os.getcwd(), "labs/config.yaml")
+        with open(self.yaml_dir, "rb") as file:
+            self.config = yaml.safe_load(file)
+        self.min_val = min_val
+        self.max_val = max_val
+        self.min_data = self.config["DATA"]["MIN_DATA"]
+        self.max_data = self.config["DATA"]["MAX_DATA"]
+
+    def fit(self, data):
+        self.min_data = min(data)
+        self.max_data = max(data)
+        self.config["DATA"]["MIN_DATA"] = self.min_data
+        self.config["DATA"]["MAX_DATA"] = self.max_data
+        with open(self.yaml_dir, "w") as file:
+            yaml.dump(self.config, file)
+
+    def transform(self, data):
+        scaled_data = (data - self.min_data) / (self.max_data - self.min_data)
+        scaled_data = scaled_data * (self.max_val - self.min_val) + self.min_val
+        return scaled_data
+
+    def list_transform(self, data):
+        scaled_data = []
+        for value in data:
+            norm_ = (value - self.min_data) / (self.max_data - self.min_data)
+            norm_ = norm_ * (self.max_val - self.min_val) + self.min_val
+            scaled_data.append(norm_)
+        return scaled_data
+
+    def inverse_transform(self, scaled_data, min_data=None, max_data=None):
+        if min_data:
+            self.min_data = min_data
+        if max_data:
+            self.max_data = max_data
+
+        data = (scaled_data - self.min_val) / (self.max_val - self.min_val)
+        data = data * (self.max_data - self.min_data) + self.min_data
+        return data
 
 
 # function to create train, test data given stock data and sequence length
