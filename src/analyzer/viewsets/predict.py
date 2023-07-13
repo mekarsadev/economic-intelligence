@@ -17,7 +17,7 @@ class PredictViewset(Resource):
 
     def post(self):
         data = request.get_json()
-        ticker_ = "USD" if data["model"] == "USDIDR=x" else "JPYIDR=x"
+        ticker_ = "USD" if data["model"] == "USDIDR=x" else "JPY"
         config_file = "labs/config.yaml" if ticker_ == "USD" else "labs/config-jpy.yaml"
 
         with open(config_file, "rb") as file:
@@ -56,10 +56,11 @@ class PredictViewset(Resource):
         # normalization trigeer data test
         data_scaler = CustomMinMaxScaler(min_val=-1, max_val=1)
         normalized = data_scaler.list_transform(trigger_test)
-        print(normalized)
+        print(normalized[-7:])
 
         # sliding window trigger data test
         X_input = self.sliding_window(normalized, window_size=INPUT)
+        print("input X", X_input[-1])
 
         with torch.no_grad():
             predicted_list = []
