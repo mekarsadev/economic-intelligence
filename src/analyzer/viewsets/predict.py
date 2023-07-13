@@ -27,6 +27,22 @@ class PredictViewset(Resource):
         HIDDEN_1 = config["MODEL"]["CHECKPOINT"]["HIDDEN_1"]
         HIDDEN_2 = config["MODEL"]["CHECKPOINT"]["HIDDEN_2"]
 
+        # load data trigger
+        trigger_test = []
+        end_date = datetime.now().date()
+        current = int(time.mktime(end_date.timetuple()))
+        if "trigger" in data:
+            trigger_test = data["trigger"]
+        else:
+            start_date = end_date - timedelta(days=30)
+
+            end_date = end_date.strftime("%Y-%m-%d")
+            start_date = start_date.strftime("%Y-%m-%d")
+
+            ofx_sample = ofx_dataset(start_date, end_date)
+            for rate in ofx_sample[["values"]].values:
+                trigger_test.append(rate[0])
+
         lstm = LSTMModel(input_size=1, hidden_sizes=[HIDDEN_1, HIDDEN_2], output_size=1)
         lstm.load_state_dict(
             torch.load(f"labs/models/{ticker_}/{INPUT}_{HIDDEN_1}_{HIDDEN_2}.pth")
@@ -35,23 +51,12 @@ class PredictViewset(Resource):
         if data["model"] not in self.TICKERS:
             return {"message": "ticker not available."}, 400
 
-        end_date = datetime.now().date()
-        start_date = end_date - timedelta(days=30)
-        current = int(time.mktime(end_date.timetuple()))
-
-        end_date = end_date.strftime("%Y-%m-%d")
-        start_date = start_date.strftime("%Y-%m-%d")
-
-        ofx_sample = ofx_dataset(start_date, end_date)
-
         # get trigger data test
-        trigger_test = []
-        for rate in ofx_sample[["values"]].values:
-            trigger_test.append(rate[0])
 
         # normalization trigeer data test
         data_scaler = CustomMinMaxScaler(min_val=-1, max_val=1)
         normalized = data_scaler.list_transform(trigger_test)
+        print(normalized)
 
         # sliding window trigger data test
         X_input = self.sliding_window(normalized, window_size=INPUT)
@@ -64,9 +69,9 @@ class PredictViewset(Resource):
             for _ in range(7):
                 prediction = lstm(input_sequence)
                 predicted_list.append(data_scaler.inverse_transform(prediction.item()))
-                predicted_timestamp.append(current)
 
                 current += 86400
+                predicted_timestamp.append(current)
 
                 input_sequence = torch.cat(
                     (input_sequence[:, 1:, :], prediction.unsqueeze(0)), dim=1
