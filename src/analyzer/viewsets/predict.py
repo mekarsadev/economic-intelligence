@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -36,6 +37,7 @@ class PredictViewset(Resource):
 
         end_date = datetime.now().date()
         start_date = end_date - timedelta(days=30)
+        current = int(time.mktime(end_date.timetuple()))
 
         end_date = end_date.strftime("%Y-%m-%d")
         start_date = start_date.strftime("%Y-%m-%d")
@@ -56,36 +58,22 @@ class PredictViewset(Resource):
 
         with torch.no_grad():
             predicted_list = []
+            predicted_timestamp = []
             input_sequence = torch.Tensor(X_input[-1:])
 
-            print("input pertama -> ", input_sequence, end="\n")
-
-            for _ in range(12):
+            for _ in range(7):
                 prediction = lstm(input_sequence)
                 predicted_list.append(data_scaler.inverse_transform(prediction.item()))
+                predicted_timestamp.append(current)
+
+                current += 86400
 
                 input_sequence = torch.cat(
                     (input_sequence[:, 1:, :], prediction.unsqueeze(0)), dim=1
                 )
-                print("input sequence ->", input_sequence, end="\n")
-                # input_sequence = input_sequence[:, -INPUT:, :]
 
-        return predicted_list
-
-        # prediction
-        # with torch.no_grad():
-        #     timestamp = int(time.time())
-        #     predicted_values = []
-        #     predicted_timestamp = []
-
-        #     for i in range(10):
-        #         # predicted_values = lstm(X_input)
-        #         timestamp += 86400
-        #         predicted_timestamp.append(timestamp)
-        #         predicted_values.append(ofx_sample[["values"]].values[i][0])
-
-        # response = {"timestamp": predicted_timestamp, "values": predicted_values}
-        # return response
+        response = {"timestamp": predicted_timestamp, "values": predicted_list}
+        return response
 
     # Modul Sliding Window
     def sliding_window(self, data, window_size):
