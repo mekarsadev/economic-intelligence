@@ -43,10 +43,18 @@ class PredictViewset(Resource):
             for rate in ofx_sample[["values"]].values:
                 trigger_test.append(rate[0])
 
-        lstm = LSTMModel(input_size=1, hidden_sizes=[HIDDEN_1, HIDDEN_2], output_size=1)
-        lstm.load_state_dict(
-            torch.load(f"labs/models/{ticker_}/{INPUT}_{HIDDEN_1}_{HIDDEN_2}.pth")
-        )
+        if ticker_ == "USD":
+            lstm = LSTMModel(
+                input_size=1, hidden_sizes=[HIDDEN_1, HIDDEN_2], output_size=1
+            )
+            lstm.load_state_dict(
+                torch.load(f"labs/models/{ticker_}/{INPUT}_{HIDDEN_1}_{HIDDEN_2}.pth")
+            )
+        elif ticker_ == "JPY":
+            lstm = LSTMModel(input_size=1, hidden_sizes=[HIDDEN_1], output_size=1)
+            lstm.load_state_dict(
+                torch.load(f"labs/models/{ticker_}/{INPUT}_{HIDDEN_1}.pth")
+            )
 
         if data["model"] not in self.TICKERS:
             return {"message": "ticker not available."}, 400
