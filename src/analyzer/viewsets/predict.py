@@ -27,20 +27,20 @@ class PredictViewset(Resource):
         HIDDEN_1 = config["MODEL"]["CHECKPOINT"]["HIDDEN_1"]
         HIDDEN_2 = config["MODEL"]["CHECKPOINT"]["HIDDEN_2"]
 
+        print(INPUT, HIDDEN_1, HIDDEN_2)
+
         # load data trigger
         trigger_test = []
-        end_date = datetime.now().date()
+        end_date = datetime.now() - timedelta(days=7)
         current = int(time.mktime(end_date.timetuple()))
+
         if "trigger" in data:
             trigger_test = data["trigger"]
         else:
-            start_date = end_date - timedelta(days=30)
-
-            end_date = end_date.strftime("%Y-%m-%d")
-            start_date = start_date.strftime("%Y-%m-%d")
+            start_date = data["start_preview"] * 1000
+            end_date = data["end_preview"] * 1000
 
             ofx_sample = ofx_dataset(start_date, end_date, scc=ticker_)
-            print(ofx_sample)
             for rate in ofx_sample[["values"]].values:
                 trigger_test.append(rate[0])
 
@@ -57,29 +57,41 @@ class PredictViewset(Resource):
         # normalization trigeer data test
         data_scaler = CustomMinMaxScaler(min_val=-1, max_val=1, config_file=config_file)
         normalized = data_scaler.list_transform(trigger_test)
-        print(normalized[-7:])
 
         # sliding window trigger data test
         X_input = self.sliding_window(normalized, window_size=INPUT)
-        print("input X", X_input[-1])
 
         with torch.no_grad():
-            predicted_list = []
             predicted_timestamp = []
-            input_sequence = torch.Tensor(X_input[-1:])
+            new_predicted = []
+            for _ in range(20):
+                input_sequence = torch.Tensor(X_input)
+                predicted = lstm(input_sequence)
 
-            for _ in range(7):
-                prediction = lstm(input_sequence)
-                predicted_list.append(data_scaler.inverse_transform(prediction.item()))
+                # insert last predict to new X data rows
+                _new = torch.Tensor([predicted[-1]])
+                X_new = torch.cat((X_input[-1][1:], _new.view(1, 1)), dim=0)
+                X_input = torch.cat((X_input, X_new.view(1, X_new.shape[0], 1)), dim=0)
 
+                predicted_denorm = data_scaler.inverse_transform(predicted)
+
+                new_predicted.append(predicted_denorm[-1].item())
                 current += 86400
                 predicted_timestamp.append(current)
 
-                input_sequence = torch.cat(
-                    (input_sequence[:, 1:, :], prediction.unsqueeze(0)), dim=1
-                )
+            # for _ in range(7):
+            #     prediction = lstm(input_sequence)
+            #     predicted_list.append(data_scaler.inverse_transform(prediction.item()))
 
-        response = {"timestamp": predicted_timestamp, "values": predicted_list}
+            #     current += 86400
+            #     predicted_timestamp.append(current)
+
+            #     input_sequence = torch.cat(
+            #         (input_sequence[:, 1:, :], prediction.unsqueeze(0)), dim=1
+            #     )
+
+        # response = {"timestamp": predicted_timestamp, "values": predicted_denorm.flatten().tolist()}
+        response = {"timestamp": predicted_timestamp, "values": new_predicted}
         return response
 
     # Modul Sliding Window
