@@ -28,8 +28,6 @@ class PredictViewset(Resource):
         HIDDEN_1 = config["MODEL"]["CHECKPOINT"]["HIDDEN_1"]
         HIDDEN_2 = config["MODEL"]["CHECKPOINT"]["HIDDEN_2"]
 
-        print(INPUT, HIDDEN_1, HIDDEN_2)
-
         # load data trigger
         trigger_test = []
         end_date = datetime.now() - timedelta(days=7)
