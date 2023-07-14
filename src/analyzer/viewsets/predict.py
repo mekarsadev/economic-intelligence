@@ -17,6 +17,7 @@ class PredictViewset(Resource):
 
     def post(self):
         data = request.get_json()
+        predict_size = data.get("length", 100)
         ticker_ = "USD" if data["model"] == "USDIDR=x" else "JPY"
         config_file = "labs/config.yaml" if ticker_ == "USD" else "labs/config-jpy.yaml"
 
@@ -64,7 +65,7 @@ class PredictViewset(Resource):
         with torch.no_grad():
             predicted_timestamp = []
             new_predicted = []
-            for _ in range(20):
+            for _ in range(predict_size):
                 input_sequence = torch.Tensor(X_input)
                 predicted = lstm(input_sequence)
 
